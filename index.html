@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Signature Studio — Web Crypto API</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="app-header">
+      <div class="badge">Web Crypto API • 100% Client-Side</div>
+      <h1>Digital Signature Studio</h1>
+      <p>Pembuatan pasangan kunci asimetris, penandatanganan digital (SHA-256), dan verifikasi integritas pesan maupun file.</p>
+    </header>
+
+    <!-- Navigasi Tab -->
+    <nav class="tabs" role="tablist">
+      <button class="tab-btn active" data-tab="tab-keygen">1. Buat Pasangan Kunci</button>
+      <button class="tab-btn" data-tab="tab-sign">2. Tanda Tangani</button>
+      <button class="tab-btn" data-tab="tab-verify">3. Verifikasi Tanda Tangan</button>
+    </nav>
+
+    <!-- TAB 1: KEY GENERATION -->
+    <section id="tab-keygen" class="tab-panel active">
+      <div class="card">
+        <h2>Pembangkit Pasangan Kunci (Key Pair)</h2>
+        <p class="subtitle">Pilih algoritma kriptografi asimetris untuk menghasilkan Kunci Privat dan Kunci Publik berformat PEM.</p>
+
+        <div class="control-row">
+          <div class="form-group">
+            <label for="keygen-algo">Algoritma Kriptografi</label>
+            <select id="keygen-algo">
+              <option value="ECDSA">ECDSA (Elliptic Curve P-256) — Cepat & Ringkas</option>
+              <option value="RSA-PSS">RSA-PSS (2048-bit) — Standar Klasik</option>
+            </select>
+          </div>
+          <button id="btn-generate-keys" class="btn primary">Buat Pasangan Kunci Baru</button>
+        </div>
+
+        <div id="keygen-output" class="hidden">
+          <div class="grid-2">
+            <div class="form-group">
+              <div class="label-row">
+                <label for="gen-public-key">Kunci Publik (Public Key - SPKI PEM)</label>
+                <div class="mini-actions">
+                  <button class="btn-sm" data-copy="gen-public-key">Salin</button>
+                  <button class="btn-sm" id="dl-public-key">Unduh .pem</button>
+                </div>
+              </div>
+              <textarea id="gen-public-key" rows="9" readonly></textarea>
+            </div>
+
+            <div class="form-group">
+              <div class="label-row">
+                <label for="gen-private-key">Kunci Privat (Private Key - PKCS#8 PEM)</label>
+                <div class="mini-actions">
+                  <button class="btn-sm" data-copy="gen-private-key">Salin</button>
+                  <button class="btn-sm" id="dl-private-key">Unduh .pem</button>
+                </div>
+              </div>
+              <textarea id="gen-private-key" rows="9" readonly></textarea>
+            </div>
+          </div>
+
+          <div class="action-bar">
+            <button id="btn-autofill-keys" class="btn secondary">Gunakan Kunci Ini di Tab Tanda Tangan & Verifikasi →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: SIGNING -->
+    <section id="tab-sign" class="tab-panel">
+      <div class="card">
+        <h2>Tanda Tangani Pesan atau File</h2>
+        <p class="subtitle">Data akan di-hash menggunakan <strong>SHA-256</strong> lalu dienkripsi dengan Kunci Privat Anda.</p>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="sign-algo">Algoritma Kunci</label>
+            <select id="sign-algo">
+              <option value="ECDSA">ECDSA (P-256)</option>
+              <option value="RSA-PSS">RSA-PSS (2048-bit)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Jenis Input Data</label>
+            <div class="radio-group">
+              <label><input type="radio" name="sign-input-type" value="text" checked /> Teks Pesan</label>
+              <label><input type="radio" name="sign-input-type" value="file" /> File / Dokumen</label>
+            </div>
+          </div>
+        </div>
+
+        <div id="sign-text-box" class="form-group">
+          <label for="sign-message">Pesan yang Akan Ditandatangani</label>
+          <textarea id="sign-message" rows="4" placeholder="Ketik pesan atau isi dokumen di sini...">Saya menyetujui transaksi sebesar Rp 5.000.000 pada tanggal 24 November 2026.</textarea>
+        </div>
+
+        <div id="sign-file-box" class="form-group hidden">
+          <label for="sign-file">Pilih File</label>
+          <input type="file" id="sign-file" />
+          <small id="sign-file-info" class="muted">Belum ada file dipilih.</small>
+        </div>
+
+        <div class="hash-preview">
+          <span>SHA-256 Digest:</span>
+          <code id="sign-sha256-preview">-</code>
+        </div>
+
+        <div class="form-group">
+          <label for="sign-private-key">Kunci Privat Pengirim (PEM)</label>
+          <textarea id="sign-private-key" rows="6" placeholder="-----BEGIN PRIVATE KEY----- ..."></textarea>
+        </div>
+
+        <button id="btn-sign" class="btn primary">Buat Tanda Tangan Digital</button>
+
+        <div id="sign-result" class="result-box hidden">
+          <div class="form-group">
+            <div class="label-row">
+              <label for="sign-output-b64">Hasil Tanda Tangan (Base64)</label>
+              <button class="btn-sm" data-copy="sign-output-b64">Salin Base64</button>
+            </div>
+            <textarea id="sign-output-b64" rows="3" readonly></textarea>
+          </div>
+
+          <div class="form-group">
+            <div class="label-row">
+              <label for="sign-output-hex">Hasil Tanda Tangan (Hexadecimal)</label>
+              <button class="btn-sm" data-copy="sign-output-hex">Salin Hex</button>
+            </div>
+            <textarea id="sign-output-hex" rows="2" readonly></textarea>
+          </div>
+
+          <div class="action-bar">
+            <button id="btn-send-to-verify" class="btn secondary">Kirim ke Tab Verifikasi →</button>
+            <button id="btn-download-bundle" class="btn outline">Unduh Paket Bukti (.json)</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: VERIFY -->
+    <section id="tab-verify" class="tab-panel">
+      <div class="card">
+        <h2>Verifikasi Tanda Tangan Digital</h2>
+        <p class="subtitle">Periksa apakah pesan/file benar-benar berasal dari pemilik kunci dan belum dimodifikasi.</p>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="verify-algo">Algoritma Kunci</label>
+            <select id="verify-algo">
+              <option value="ECDSA">ECDSA (P-256)</option>
+              <option value="RSA-PSS">RSA-PSS (2048-bit)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Jenis Data yang Diverifikasi</label>
+            <div class="radio-group">
+              <label><input type="radio" name="verify-input-type" value="text" checked /> Teks Pesan</label>
+              <label><input type="radio" name="verify-input-type" value="file" /> File / Dokumen</label>
+            </div>
+          </div>
+        </div>
+
+        <div id="verify-text-box" class="form-group">
+          <div class="label-row">
+            <label for="verify-message">Pesan yang Diterima</label>
+            <button id="btn-tamper-test" class="btn-sm warn" title="Ubah 1 karakter untuk menguji deteksi manipulasi">Uji Tampering (Ubah 1 Karakter)</button>
+          </div>
+          <textarea id="verify-message" rows="4" placeholder="Masukkan pesan yang ingin diverifikasi..."></textarea>
+        </div>
+
+        <div id="verify-file-box" class="form-group hidden">
+          <label for="verify-file">Pilih File yang Diterima</label>
+          <input type="file" id="verify-file" />
+          <small id="verify-file-info" class="muted">Belum ada file dipilih.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="verify-public-key">Kunci Publik Pengirim (PEM)</label>
+          <textarea id="verify-public-key" rows="6" placeholder="-----BEGIN PUBLIC KEY----- ..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="verify-signature">Tanda Tangan Digital (Base64 atau Hex)</label>
+          <textarea id="verify-signature" rows="3" placeholder="Tempel tanda tangan digital di sini..."></textarea>
+        </div>
+
+        <button id="btn-verify" class="btn primary">Verifikasi Keaslian</button>
+
+        <div id="verify-status" class="status-banner hidden"></div>
+      </div>
+    </section>
+
+    <div id="toast" class="toast">Tersalin ke clipboard!</div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
