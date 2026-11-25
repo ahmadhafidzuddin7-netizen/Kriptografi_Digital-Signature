@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Konsep Digital Signature, alur proses, algoritma, dan ECDSA P-256.">
+  <title>Digital Signature — Concepts & Algorithms</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <header class="topbar">
+    <a class="brand" href="#home">⌁ SIGNATURE<span>LAB</span></a>
+    <nav>
+      <a href="#workflow">Process</a>
+      <a href="#algorithms">Algorithms</a>
+      <a href="#ecdsa">ECDSA</a>
+      <a href="#implementation">Implementation</a>
+    </nav>
+    <a class="demo-link" href="index.html">Open Demo ↗</a>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero wrap" id="home">
+      <div>
+        <div class="eyebrow">CRYPTOGRAPHY FUNDAMENTALS</div>
+        <h1>Understanding<br><em>Digital Signature.</em></h1>
+        <p class="lead">
+          Bagaimana cara memastikan pesan tidak diubah dan tanda tangan digitalnya cocok dengan kunci yang digunakan?
+        </p>
+        <a class="button" href="#workflow">Explore the process ↓</a>
+        <div class="hero-meta">
+          <span><b>01</b> Concept</span>
+          <span><b>02</b> Algorithms</span>
+          <span><b>03</b> Implementation</span>
+        </div>
+      </div>
+
+      <div class="hero-art">
+        <div class="orbit"></div>
+        <div class="core">⌑<b>VERIFIED</b><small>DIGITAL SIGNATURE</small></div>
+        <div class="float f1">PUBLIC KEY<br><b>Verification</b></div>
+        <div class="float f2">PRIVATE KEY<br><b>Signing</b></div>
+      </div>
+    </section>
+
+
+    <!-- OVERVIEW -->
+    <section class="intro wrap">
+      <div>
+        <label>01 / OVERVIEW</label>
+        <h2>What is a<br>Digital Signature?</h2>
+      </div>
+
+      <div>
+        <p>
+          Digital Signature atau tanda tangan digital adalah mekanisme kriptografi
+          yang digunakan untuk memeriksa apakah sebuah pesan masih asli dan apakah
+          tanda tangannya cocok dengan kunci publik yang digunakan untuk memeriksanya.
+        </p>
+
+        <p>
+          Misalnya, seseorang mengirimkan dokumen digital kepada orang lain.
+          Penerima ingin memastikan bahwa isi dokumen tidak berubah selama proses
+          pengiriman dan tanda tangan digitalnya sesuai dengan kunci publik yang diberikan.
+        </p>
+
+        <p>
+          Untuk melakukan pemeriksaan tersebut, Digital Signature menggunakan
+          dua kunci yang saling berhubungan:
+          <b>Private Key</b> dan <b>Public Key</b>.
+        </p>
+
+        <div class="pills">
+          <span>INTEGRITY</span>
+          <span>AUTHENTICITY</span>
+          <span>NON-REPUDIATION*</span>
+        </div>
+
+        <small>
+          *Non-repudiation bergantung pada pengelolaan kunci, pembuktian identitas,
+          dan kerangka hukum atau kepercayaan yang berlaku.
+        </small>
+      </div>
+    </section>
+
+
+    <!-- WORKFLOW -->
+    <section class="section wrap" id="workflow">
+
+      <div class="heading">
+        <div>
+          <label>02 / THE PROCESS</label>
+          <h2>How Digital Signature Works</h2>
+        </div>
+        <p>
+          Digital Signature bekerja melalui beberapa tahap,
+          mulai dari pembuatan kunci hingga pemeriksaan tanda tangan oleh penerima.
+        </p>
+      </div>
+
+      <div class="steps">
+
+        <article class="step">
+          <small>01 · SENDER</small>
+          <div class="symbol">⌘</div>
+          <h3>Key Generation</h3>
+          <p>
+            Sebelum mengirim pesan, pengirim membuat sepasang kunci
+            yang saling berhubungan.
+          </p>
+
+          <div class="key">
+            <b>Private Key</b>
+            <span>Harus dirahasiakan · digunakan untuk membuat tanda tangan</span>
+          </div>
+
+          <div class="key pub">
+            <b>Public Key</b>
+            <span>Dapat dibagikan · digunakan untuk memeriksa tanda tangan</span>
+          </div>
+        </article>
+
+        <div class="arrow">→</div>
+
+        <article class="step">
+          <small>02 · MESSAGE</small>
+          <div class="symbol">#</div>
+          <h3>Hashing</h3>
+          <p>
+            Pesan dimasukkan ke fungsi hash, misalnya SHA-256.
+            Proses ini menghasilkan ringkasan pesan dengan ukuran tetap
+            yang disebut <i>message digest</i>.
+          </p>
+          <div class="mini-flow">
+            Original message <b>↓ SHA-256 ↓</b> Message digest
+          </div>
+        </article>
+
+        <div class="arrow">→</div>
+
+        <article class="step selected">
+          <small>03 · SENDER</small>
+          <div class="symbol">✎</div>
+          <h3>Signing</h3>
+          <p>
+            Program menggunakan Private Key dan hasil hashing
+            untuk membuat tanda tangan digital.
+          </p>
+          <div class="signature">
+            Digital Signature <b>(r, s)</b>
+          </div>
+        </article>
+
+      </div>
+
+      <div class="transmission">
+        <div class="symbol">⇢</div>
+        <div>
+          <small>TRANSMISSION</small>
+          <h3>Pesan dikirim ke penerima</h3>
+          <p>
+            Pengirim mengirimkan tiga hal kepada penerima:
+            pesan asli, tanda tangan digital, dan Public Key.
+            Penerima tetap perlu memastikan bahwa Public Key tersebut
+            benar-benar milik pihak yang diklaim sebagai pengirim.
+          </p>
+        </div>
+        <div class="tags">
+          <span>MESSAGE</span>
+          <span>SIGNATURE</span>
+          <span>PUBLIC KEY</span>
+        </div>
+      </div>
+
+      <div class="verify">
+        <div>
+          <small>04 · RECEIVER</small>
+          <h3>Verification</h3>
+          <p>
+            Penerima menggunakan pesan, tanda tangan digital, dan Public Key
+            untuk melakukan verifikasi. Program menghitung hash pesan kembali,
+            kemudian memeriksa apakah tanda tangan tersebut cocok.
+          </p>
+        </div>
+
+        <div class="results">
+          <div class="valid">
+            <b>✓ VALID</b>
+            <span>
+              Tanda tangan cocok dengan pesan dan Public Key yang digunakan.
+            </span>
+          </div>
+          <div class="invalid">
+            <b>× INVALID</b>
+            <span>
+              Tanda tangan tidak cocok dengan pesan atau Public Key yang digunakan.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="note">
+        <b>Perlu diingat:</b>
+        hasil VALID hanya berarti tanda tangan cocok dengan pesan dan Public Key
+        yang diberikan. Hasil ini belum otomatis membuktikan identitas pengirim.
+        Penerima harus memastikan bahwa Public Key tersebut benar milik orang
+        yang dimaksud.
+      </div>
+
+    </section>
+
+
+    <!-- ALGORITHMS -->
+    <section class="section alternate" id="algorithms">
+      <div class="wrap">
+
+        <div class="heading">
+          <div>
+            <label>03 / ALGORITHM LANDSCAPE</label>
+            <h2>Digital Signature Algorithms</h2>
+          </div>
+          <p>
+            Ada beberapa algoritma yang dapat digunakan untuk membuat tanda tangan digital.
+            Masing-masing menggunakan pendekatan matematika yang berbeda.
+          </p>
+        </div>
+
+        <div class="algorithm-grid">
+
+          <article>
+            <div class="algo-mark">R</div>
+            <small>FACTORISATION</small>
+            <h3>RSA-PSS</h3>
+            <p>
+              RSA-PSS adalah skema tanda tangan digital yang menggunakan algoritma RSA.
+              Keamanannya berkaitan dengan sulitnya memecah bilangan besar menjadi
+              faktor-faktor prima. RSA-PSS merupakan salah satu skema yang umum
+              direkomendasikan untuk penggunaan baru.
+            </p>
+            <footer>RSA <span>Widely supported</span></footer>
+          </article>
+
+          <article>
+            <div class="algo-mark">D</div>
+            <small>DISCRETE LOG</small>
+            <h3>DSA</h3>
+            <p>
+              DSA merupakan algoritma tanda tangan digital yang lebih lama.
+              Keamanannya berkaitan dengan masalah matematika yang disebut
+              logaritma diskrit. DSA bukan pilihan utama untuk sistem baru.
+            </p>
+            <footer>Legacy <span>Signature only</span></footer>
+          </article>
+
+          <article class="featured">
+            <div class="algo-mark">E</div>
+            <small>ELLIPTIC CURVE</small>
+            <h3>ECDSA</h3>
+            <p>
+              ECDSA menggunakan konsep matematika kurva eliptik untuk membuat
+              dan memeriksa tanda tangan digital. Salah satu kelebihannya adalah
+              ukuran kunci dapat lebih kecil dibandingkan RSA untuk tingkat keamanan
+              yang sebanding.
+            </p>
+            <footer>Our choice <span>ECDSA P-256</span></footer>
+          </article>
+
+          <article>
+            <div class="algo-mark">Ed</div>
+            <small>EDWARDS CURVE</small>
+            <h3>EdDSA</h3>
+            <p>
+              EdDSA adalah keluarga algoritma tanda tangan digital yang menggunakan
+              kurva Edwards. Salah satu contohnya adalah Ed25519.
+              Algoritma ini dirancang agar proses membuat dan memeriksa tanda tangan
+              berjalan secara efisien.
+            </p>
+            <footer>Modern <span>Ed25519</span></footer>
+          </article>
+
+        </div>
+
+        <div class="table-wrap">
+          <h3>Quick Comparison</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Algorithm</th>
+                <th>Mathematical foundation</th>
+                <th>Key characteristic</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>RSA-PSS</td>
+                <td>Integer factorisation</td>
+                <td>Broad compatibility; larger keys</td>
+              </tr>
+              <tr>
+                <td>DSA</td>
+                <td>Discrete logarithm</td>
+                <td>Legacy signature algorithm</td>
+              </tr>
+              <tr class="chosen">
+                <td>ECDSA</td>
+                <td>Elliptic curve discrete logarithm</td>
+                <td>Smaller keys; used in this project</td>
+              </tr>
+              <tr>
+                <td>EdDSA</td>
+                <td>Edwards-curve cryptography</td>
+                <td>Efficient modern signature design</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ECDSA DEEP DIVE -->
+    <section class="section wrap" id="ecdsa">
+
+      <div class="heading">
+        <div>
+          <label>04 / DEEP DIVE</label>
+          <h2>Understanding ECDSA</h2>
+        </div>
+        <p>
+          Program kita menggunakan ECDSA. Pada bagian ini, kita akan mengenal
+          konsep dasar kurva eliptik dan memahami bagaimana ECDSA membuat
+          serta memeriksa tanda tangan digital.
+        </p>
+      </div>
+
+      <div class="ecdsa-intro">
+
+        <div>
+          <div class="big-ecdsa">EC<span>D</span>SA</div>
+          <h3>Elliptic Curve Digital Signature Algorithm</h3>
+          <p>
+            ECDSA adalah algoritma untuk membuat dan memeriksa tanda tangan digital
+            dengan menggunakan matematika kurva eliptik.
+
+            Secara sederhana, Private Key digunakan untuk membuat tanda tangan,
+            sedangkan Public Key digunakan untuk memeriksanya.
+          </p>
+        </div>
+
+        <div class="curve">
+          <svg viewBox="0 0 440 230" role="img" aria-label="Ilustrasi konseptual kurva eliptik">
+            <path d="M20 115H420 M220 10V220" stroke="#33465f" stroke-dasharray="4 6" />
+            <path d="M35 115 C90 20 145 25 220 115 C295 205 350 210 405 115" fill="none" stroke="#38bdf8"
+              stroke-width="3" />
+            <path d="M75 54L340 176" stroke="#64748b" stroke-dasharray="5 5" />
+            <circle cx="75" cy="54" r="5" fill="#60a5fa" />
+            <circle cx="340" cy="176" r="5" fill="#22d3ee" />
+            <text x="58" y="39" fill="#bfdbfe">G</text>
+            <text x="348" y="190" fill="#a5f3fc">Q = d × G</text>
+          </svg>
+          <small>Ilustrasi konseptual, bukan plot parameter P-256 yang sebenarnya.</small>
+        </div>
+
+      </div>
+
+
+      <!-- ECDSA COMPONENTS -->
+      <div class="concepts">
+
+        <article>
+          <small>01</small>
+          <h3>Elliptic Curve</h3>
+          <p>
+            Kurva yang memiliki aturan matematika tertentu.
+            Titik-titik pada kurva ini dapat digunakan dalam operasi matematika
+            yang menjadi dasar teknologi Elliptic Curve Cryptography (ECC).
+          </p>
+        </article>
+
+        <article>
+          <small>02</small>
+          <h3>Generator Point (G)</h3>
+          <p>
+            Generator Point adalah titik khusus pada kurva yang digunakan
+            sebagai titik awal dalam proses perhitungan kunci.
+          </p>
+        </article>
+
+        <article>
+          <small>03</small>
+          <h3>Private Key (d)</h3>
+          <p>
+            Private Key adalah sebuah angka rahasia yang hanya boleh diketahui
+            oleh pemilik kunci. Angka ini digunakan untuk membuat tanda tangan digital.
+          </p>
+        </article>
+
+        <article>
+          <small>04</small>
+          <h3>Public Key (Q)</h3>
+          <p>
+            Public Key dibentuk melalui perhitungan Private Key dengan Generator Point.
+            Kunci ini boleh dibagikan dan digunakan untuk memeriksa tanda tangan digital.
+          </p>
+        </article>
+
+      </div>
+
+
+      <!-- PUBLIC KEY RELATIONSHIP -->
+      <div class="equation">
+        <small>PUBLIC KEY RELATIONSHIP</small>
+        <strong>Q = d × G</strong>
+        <p>
+          Public Key (Q) diperoleh dengan mengalikan Private Key (d)
+          dengan Generator Point (G) menggunakan aturan matematika kurva eliptik.
+
+          Proses menghitung Public Key dari Private Key dapat dilakukan dengan mudah.
+          Namun, mencari Private Key hanya berdasarkan Public Key merupakan
+          masalah matematika yang sangat sulit.
+
+          Inilah salah satu dasar keamanan ECC.
+        </p>
+      </div>
+
+
+      <!-- SIGNING -->
+      <div class="subheading">
+        <label>04.1 / SIGNING</label>
+        <h3>How ECDSA Generates a Signature</h3>
+        <p>
+          Ketika pengirim ingin menandatangani pesan, ECDSA menggunakan
+          hasil hashing dan Private Key untuk melakukan perhitungan matematika.
+          Hasil akhirnya berupa dua angka, yaitu r dan s, yang bersama-sama
+          membentuk tanda tangan digital.
+        </p>
+      </div>
+
+      <div class="process">
+        <div>
+          INPUT
+          <b>Message</b>
+          <small>Pesan asli</small>
+        </div>
+        <i>→</i>
+        <div>
+          HASHING
+          <b>SHA-256</b>
+          <small>Message digest (z)</small>
+        </div>
+        <i>→</i>
+        <div class="accent">
+          ECDSA SIGN
+          <b>Private Key + nonce</b>
+          <small>Operasi matematis kurva</small>
+        </div>
+        <i>→</i>
+        <div class="output">
+          OUTPUT
+          <b>Signature (r, s)</b>
+          <small>Digital signature</small>
+        </div>
+      </div>
+
+
+      <!-- SIGNING FORMULAS -->
+      <div class="formulas">
+
+        <article>
+          <small>COMPONENT 01 · CALCULATING r</small>
+          <strong>r = x<sub>R</sub> mod n</strong>
+          <p>
+            Pertama, angka sementara yang disebut nonce (k) dikalikan
+            dengan Generator Point (G) untuk mendapatkan titik R.
+
+            Nilai r kemudian diperoleh dari koordinat x titik R
+            yang dihitung menggunakan operasi modulo n.
+          </p>
+          <p>
+            Dengan kata lain, nilai r berasal dari hasil perhitungan
+            nonce pada kurva eliptik.
+          </p>
+        </article>
+
+        <article>
+          <small>COMPONENT 02 · CALCULATING s</small>
+          <strong>s = k<sup>−1</sup>(z + rd) mod n</strong>
+          <p>
+            Nilai s dihitung menggunakan beberapa komponen:
+            hash pesan (z), Private Key (d), nonce (k),
+            dan nilai r yang sudah diperoleh sebelumnya.
+          </p>
+          <p>
+            Setelah nilai r dan s diperoleh, keduanya menjadi bagian
+            dari tanda tangan digital.
+          </p>
+        </article>
+
+      </div>
+
+
+      <!-- SIGNING VARIABLE EXPLANATION -->
+      <div class="equation">
+        <small>VARIABLE EXPLANATION · SIGNING</small>
+        <strong class="equation-small">k = Nonce</strong>
+        <strong class="equation-small">z = Hash pesan</strong>
+        <strong class="equation-small">d = Private Key</strong>
+        <strong class="equation-small">G = Generator Point</strong>
+        <strong class="equation-small">R = k × G</strong>
+        <strong class="equation-small">x<sub>R</sub> = Koordinat x dari titik R</strong>
+        <strong class="equation-small">n = Orde Generator Point</strong>
+        <p>
+          Simbol mod menunjukkan operasi modulo, yaitu operasi untuk
+          mendapatkan sisa pembagian. Sementara itu, k⁻¹ adalah invers
+          perkalian dari k dalam modulo n.
+        </p>
+      </div>
+
+      <div class="note warning">
+        <b>Security note:</b>
+        Nonce (k) adalah angka sementara yang digunakan dalam proses Signing.
+        Nilainya harus rahasia, unik, dan tidak boleh digunakan ulang secara tidak aman.
+
+        Jika nonce dikelola dengan keliru, Private Key dapat terancam.
+        Dalam program kita, pengelolaan nonce ditangani oleh Web Crypto API,
+        sehingga tidak perlu dibuat secara manual.
+      </div>
+
+
+      <!-- VERIFICATION -->
+      <div class="subheading">
+        <label>04.2 / VERIFICATION</label>
+        <h3>How ECDSA Verifies a Signature</h3>
+        <p>
+          Setelah pesan diterima, penerima menggunakan pesan, tanda tangan (r dan s),
+          serta Public Key untuk melakukan pemeriksaan.
+
+          Tujuannya adalah memastikan apakah tanda tangan tersebut cocok
+          dengan pesan yang diterima dan Public Key yang digunakan.
+        </p>
+      </div>
+
+      <div class="process">
+        <div>
+          INPUT
+          <b>Message + (r,s)</b>
+          <small>Data yang diterima</small>
+        </div>
+        <i>→</i>
+        <div>
+          HASHING
+          <b>SHA-256</b>
+          <small>Hash pesan (z)</small>
+        </div>
+        <i>→</i>
+        <div class="accent">
+          ECDSA VERIFY
+          <b>Public Key</b>
+          <small>Perhitungan verifikasi</small>
+        </div>
+        <i>→</i>
+        <div class="output">
+          OUTPUT
+          <b>Valid / Invalid</b>
+          <small>Hasil verifikasi</small>
+        </div>
+      </div>
+
+
+      <!-- VERIFICATION FORMULAS -->
+      <div class="equation">
+        <small>VERIFICATION EQUATIONS</small>
+
+        <strong class="equation-small">
+          w = s<sup>−1</sup> mod n
+        </strong>
+
+        <strong class="equation-small">
+          u<sub>1</sub> = zw mod n
+        </strong>
+
+        <strong class="equation-small">
+          u<sub>2</sub> = rw mod n
+        </strong>
+
+        <strong class="equation-small">
+          X = u<sub>1</sub>G + u<sub>2</sub>Q
+        </strong>
+
+        <strong>
+          r = x<sub>X</sub> mod n
+        </strong>
+
+        <p>
+          Dalam proses ini, sistem menghitung nilai bantu dari tanda tangan
+          dan hash pesan. Selanjutnya, sistem menggunakan Generator Point (G)
+          dan Public Key (Q) untuk mendapatkan titik X.
+
+          Jika nilai r hasil perhitungan sama dengan nilai r pada tanda tangan,
+          tanda tangan dinyatakan valid.
+        </p>
+      </div>
+
+
+      <!-- VERIFICATION VARIABLE EXPLANATION -->
+      <div class="equation">
+        <small>VARIABLE EXPLANATION · VERIFICATION</small>
+
+        <strong class="equation-small">w = Invers dari s modulo n</strong>
+        <strong class="equation-small">z = Hash pesan</strong>
+        <strong class="equation-small">r, s = Komponen tanda tangan digital</strong>
+        <strong class="equation-small">u₁, u₂ = Nilai bantu dalam verifikasi</strong>
+        <strong class="equation-small">G = Generator Point</strong>
+        <strong class="equation-small">Q = Public Key</strong>
+        <strong class="equation-small">X = Titik hasil perhitungan verifikasi</strong>
+        <strong class="equation-small">x<sub>X</sub> = Koordinat x dari titik X</strong>
+        <strong class="equation-small">n = Orde Generator Point</strong>
+
+        <p>
+          Persamaan terakhir merupakan kondisi pemeriksaan.
+          Sistem membandingkan nilai r yang dihitung dari titik X
+          dengan nilai r yang terdapat pada tanda tangan digital.
+        </p>
+      </div>
+
+      <div class="note">
+        <b>Hal penting:</b>
+        proses Verification bukan proses untuk membuka atau mendekripsi tanda tangan.
+        Public Key digunakan untuk memeriksa kecocokan tanda tangan dengan pesan.
+        Jika pemeriksaan berhasil, tanda tangan dinyatakan valid.
+      </div>
+
+
+      <!-- CURVE PARAMETERS -->
+      <div class="parameter">
+
+        <div>
+          <label>04.3 / CURVE PARAMETERS</label>
+          <h3>Why P-256?</h3>
+          <p>
+            P-256 adalah salah satu kurva eliptik standar yang dapat digunakan
+            bersama ECDSA.
+
+            Kurva ini memiliki ukuran parameter 256 bit dan didukung oleh
+            Web Crypto API, sehingga dapat digunakan langsung dalam program
+            berbasis browser.
+          </p>
+        </div>
+
+        <div class="stats">
+          <div>
+            <b>256-bit</b>
+            <small>Curve size</small>
+          </div>
+          <div>
+            <b>ECDSA</b>
+            <small>Signature algorithm</small>
+          </div>
+          <div>
+            <b>P-256</b>
+            <small>Named curve</small>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- SHA-256 -->
+    <section class="section alternate" id="hash">
+      <div class="wrap">
+
+        <div class="heading">
+          <div>
+            <label>05 / HASH FUNCTION</label>
+            <h2>The Role of SHA-256</h2>
+          </div>
+          <p>
+            SHA-256 dan ECDSA memiliki fungsi yang berbeda,
+            tetapi keduanya bekerja bersama dalam proses tanda tangan digital.
+          </p>
+        </div>
+
+        <div class="hash-grid">
+
+          <article>
+            <div class="symbol">#</div>
+            <small>HASH FUNCTION</small>
+            <h3>SHA-256</h3>
+            <p>
+              SHA-256 adalah fungsi hash yang mengubah data, baik pendek maupun panjang,
+              menjadi ringkasan berukuran 256 bit.
+
+              Jika isi pesan berubah, hasil hash-nya juga akan berbeda
+              dengan kemungkinan yang sangat tinggi.
+            </p>
+            <div class="hash-output">
+              MESSAGE → 256-BIT DIGEST
+            </div>
+          </article>
+
+          <div class="not-equal">≠</div>
+
+          <article>
+            <div class="symbol">✎</div>
+            <small>SIGNATURE ALGORITHM</small>
+            <h3>ECDSA</h3>
+            <p>
+              ECDSA menggunakan hasil hash bersama Private Key
+              untuk membuat tanda tangan digital.
+
+              Setelah itu, Public Key digunakan untuk memeriksa
+              apakah tanda tangan tersebut cocok dengan pesan.
+            </p>
+            <div class="hash-output">
+              DIGEST + KEY → SIGNATURE
+            </div>
+          </article>
+
+        </div>
+
+        <div class="note">
+          <b>Intinya:</b>
+          SHA-256 bertugas membuat ringkasan pesan, sedangkan ECDSA
+          bertugas membuat dan memeriksa tanda tangan digital.
+          Jadi, SHA-256 bukan algoritma tanda tangan digital.
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- IMPLEMENTATION -->
+    <section class="section wrap" id="implementation">
+
+      <div class="heading">
+        <div>
+          <label>06 / FROM THEORY TO CODE</label>
+          <h2>Our Implementation</h2>
+        </div>
+        <p>
+          Kita menerapkan ECDSA menggunakan JavaScript dan Web Crypto API,
+          yaitu fitur kriptografi bawaan browser.
+
+          Dengan API ini, program dapat membuat pasangan kunci,
+          menandatangani pesan, dan memeriksa tanda tangan digital.
+        </p>
+      </div>
+
+      <div class="implementation">
+
+        <article>
+          <small>TECHNICAL SPECIFICATION</small>
+          <h3>ECDSA P-256 + SHA-256</h3>
+
+          <dl>
+            <div>
+              <dt>Signature algorithm</dt>
+              <dd>ECDSA</dd>
+            </div>
+            <div>
+              <dt>Named curve</dt>
+              <dd>P-256</dd>
+            </div>
+            <div>
+              <dt>Hash function</dt>
+              <dd>SHA-256</dd>
+            </div>
+            <div>
+              <dt>Cryptography API</dt>
+              <dd>Web Crypto API</dd>
+            </div>
+            <div>
+              <dt>Language</dt>
+              <dd>JavaScript</dd>
+            </div>
+          </dl>
+        </article>
+
+        <article class="code">
+          <div class="code-head">
+            app.js <span>ALGORITHM CONFIGURATION</span>
+          </div>
+
+          <pre><code><i>const</i> KEY = {
+  name: <em>'ECDSA'</em>,
+  namedCurve: <em>'P-256'</em>
+};
+
+<i>const</i> SIG = {
+  name: <em>'ECDSA'</em>,
+  hash: <em>'SHA-256'</em>
+};</code></pre>
+        </article>
+
+      </div>
+
+      <div class="mapping">
+
+        <article>
+          <small>01</small>
+          <b>generateKey()</b>
+          <span>
+            Membuat sepasang kunci yang terdiri dari Private Key dan Public Key.
+          </span>
+        </article>
+
+        <article>
+          <small>02</small>
+          <b>sign()</b>
+          <span>
+            Membuat tanda tangan digital menggunakan Private Key.
+          </span>
+        </article>
+
+        <article>
+          <small>03</small>
+          <b>verify()</b>
+          <span>
+            Memeriksa tanda tangan digital menggunakan Public Key.
+          </span>
+        </article>
+
+      </div>
+
+      <div class="note">
+        <b>Catatan implementasi:</b>
+        pada program ini, Private Key diekspor agar dapat ditampilkan
+        dan digunakan dalam demonstrasi. Dalam aplikasi nyata,
+        Private Key harus disimpan dengan aman dan tidak dibagikan kepada pihak lain.
+      </div>
+
+      <div class="demo-banner">
+        <div>
+          <label>07 / LIVE DEMONSTRATION</label>
+          <h2>See Digital Signature in Action.</h2>
+          <p>
+            Coba langsung membuat pasangan kunci, menandatangani pesan,
+            mengirimkannya, lalu memeriksa tanda tangan.
+
+            Kamu juga bisa mengubah isi pesan untuk melihat bagaimana
+            program mendeteksi perubahan.
+          </p>
+        </div>
+        <a class="button" href="index.html">
+          Open Digital Signature Studio ↗
+        </a>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <a class="brand" href="#home">⌁ SIGNATURE<span>LAB</span></a>
+    <p>Digital Signature — Concepts & Algorithms</p>
+    <a href="#home">Back to top ↑</a>
+  </footer>
+
+</body>
+
+</html>
