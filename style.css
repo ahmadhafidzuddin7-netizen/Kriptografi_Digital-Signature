@@ -28,6 +28,19 @@ body {
   margin: auto;
 }
 
+.back {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  color: var(--mu);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--tx);
+}
+
 /* Header */
 header {
   text-align: center;
