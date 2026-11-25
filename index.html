@@ -1,68 +1,86 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Digital Signature Studio</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Signature Studio</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="wrap">
-<header>
-  <h1>🔏 Digital Signature Studio</h1>
-  <p>Simulasi tanda tangan digital: <b style="color:var(--s)">Pengirim</b> menandatangani → <b style="color:var(--r)">Penerima</b> memverifikasi. 100% di browser.<br>Algoritma: ECDSA (P-256) + SHA-256.</p>
-</header>
+    <div class="wrap">
+    <header>
+        <h1>🔏 Digital Signature Studio</h1>
+        <p>
+            Simulasi tanda tangan digital: 
+            <b style="color: var(--s)">Pengirim</b> menandatangani → 
+            <b style="color: var(--r)">Penerima</b> memverifikasi. 100% di browser.<br>
+            Algoritma: ECDSA (P-256) + SHA-256.
+        </p>
+    </header>
 
-<div class="grid">
-  <!-- PENGIRIM -->
-  <section class="card sender">
-    <span class="role">👤 PENGIRIM</span>
-    <h2>Buat & Tanda Tangani Pesan</h2>
+    <div class="grid">
+        <!-- PENGIRIM -->
+        <section class="card sender">
+        <span class="role">👤 PENGIRIM</span>
+        <h2>Buat &amp; Tanda Tangani Pesan</h2>
 
-    <h3>Langkah 1 — Kunci</h3>
-    <div class="row"><button id="gen">🔑 Buat Pasangan Kunci</button></div>
-    <label>Kunci Privat <small>(RAHASIA — jangan dibagikan)</small></label>
-    <textarea id="s-priv" rows="4" placeholder="-----BEGIN PRIVATE KEY-----"></textarea>
-    <label>Kunci Publik <small>(boleh dibagikan ke penerima)</small></label>
-    <textarea id="s-pub" rows="4" placeholder="-----BEGIN PUBLIC KEY-----"></textarea>
+        <h3>Langkah 1 — Kunci</h3>
+        <div class="row">
+            <button id="gen">🔑 Buat Pasangan Kunci</button>
+        </div>
 
-    <h3>Langkah 2 — Pesan</h3>
-    <label>Teks pesan</label>
-    <textarea id="s-msg" rows="3">Saya menyetujui transaksi sebesar Rp 5.000.000 pada tanggal 25 November 2026.</textarea>
+        <label for="s-priv">Kunci Privat <small>(RAHASIA — jangan dibagikan)</small></label>
+        <textarea id="s-priv" rows="4" placeholder="-----BEGIN PRIVATE KEY-----"></textarea>
 
-    <h3>Langkah 3 — Tanda Tangan</h3>
-    <div class="row"><button id="sign">✍️ Tanda Tangani</button></div>
-    <label>Tanda tangan (Base64)</label>
-    <textarea id="s-sig" rows="3" readonly></textarea>
-    <div class="row">
-      <button class="ghost" onclick="navigator.clipboard.writeText($('s-sig').value)">Salin</button>
-      <button id="send">📤 Kirim ke Penerima →</button>
+        <label for="s-pub">Kunci Publik <small>(boleh dibagikan ke penerima)</small></label>
+        <textarea id="s-pub" rows="4" placeholder="-----BEGIN PUBLIC KEY-----"></textarea>
+
+        <h3>Langkah 2 — Pesan</h3>
+        <label for="s-msg">Teks pesan</label>
+        <textarea id="s-msg" rows="3">Saya menyetujui transaksi sebesar Rp 5.000.000 pada tanggal 25 November 2026.</textarea>
+
+        <h3>Langkah 3 — Tanda Tangan</h3>
+        <div class="row">
+            <button id="sign">✍️ Tanda Tangani</button>
+        </div>
+
+        <label for="s-sig">Tanda tangan (Base64)</label>
+        <textarea id="s-sig" rows="3" readonly></textarea>
+
+        <div class="row">
+            <button class="ghost" onclick="navigator.clipboard.writeText($('s-sig').value)">Salin</button>
+            <button id="send">📤 Kirim ke Penerima →</button>
+        </div>
+        </section>
+
+        <!-- PENERIMA -->
+        <section class="card receiver" id="receiver">
+        <span class="role">📥 PENERIMA</span>
+        <h2>Periksa Keaslian Pesan</h2>
+
+        <h3>Data yang diterima</h3>
+        <label for="r-msg">Pesan diterima</label>
+        <textarea id="r-msg" rows="3" placeholder="Pesan dari pengirim..."></textarea>
+
+        <label for="r-pub">Kunci Publik Pengirim</label>
+        <textarea id="r-pub" rows="4" placeholder="-----BEGIN PUBLIC KEY-----"></textarea>
+
+        <label for="r-sig">Tanda Tangan (Base64)</label>
+        <textarea id="r-sig" rows="3" placeholder="Tempel tanda tangan..."></textarea>
+
+        <h3>Verifikasi</h3>
+        <div class="row">
+            <button id="verify">🔍 Verifikasi</button>
+            <button id="tamper" class="warn" title="Ubah 1 karakter pesan untuk menguji deteksi manipulasi">
+            ⚠️ Uji Tampering
+            </button>
+        </div>
+
+        <div id="status" class="hidden"></div>
+        </section>
     </div>
-  </section>
-
-  <!-- PENERIMA -->
-  <section class="card receiver" id="receiver">
-    <span class="role">📥 PENERIMA</span>
-    <h2>Periksa Keaslian Pesan</h2>
-
-    <h3>Data yang diterima</h3>
-    <label>Pesan diterima</label>
-    <textarea id="r-msg" rows="3" placeholder="Pesan dari pengirim..."></textarea>
-    <label>Kunci Publik Pengirim</label>
-    <textarea id="r-pub" rows="4" placeholder="-----BEGIN PUBLIC KEY-----"></textarea>
-    <label>Tanda Tangan (Base64)</label>
-    <textarea id="r-sig" rows="3" placeholder="Tempel tanda tangan..."></textarea>
-
-    <h3>Verifikasi</h3>
-    <div class="row">
-      <button id="verify">🔍 Verifikasi</button>
-      <button id="tamper" class="warn" title="Ubah 1 karakter pesan untuk menguji deteksi manipulasi">⚠️ Uji Tampering</button>
     </div>
-    <div id="status" class="hidden"></div>
-  </section>
-</div>
-</div>
 
-<script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
